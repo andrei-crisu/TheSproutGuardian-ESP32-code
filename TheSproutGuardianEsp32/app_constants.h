@@ -23,6 +23,11 @@ const unsigned long UPDATE_PERIOD = 5000; // 5000 ms (after each 5 seconds)
 #define DHTPIN 26
 #define DHTTYPE DHT11
 
+#define MOISTUREPIN 39
+#define LUMINOSITYPIN 36
+
+#define READING_INTERVAL 2000
+
 // HTML content
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE html>
