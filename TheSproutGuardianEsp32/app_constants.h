@@ -12,7 +12,9 @@
 const char* ESP32_SSID="Sprout";
 const char* ESP32_PASSWORD="TSG2023RKO";
 
-const unsigned long UPDATE_PERIOD = 5000; // 5000 ms (after each 5 seconds)
+#define T_SECOND 1000 // it has 1000 ms
+#define T_MINUTE 60*T_SECOND
+
 //define pump status
 #define PUMP_OFF 0
 #define PUMP_ON 255 // a value diffrent from 0
@@ -25,8 +27,14 @@ const unsigned long UPDATE_PERIOD = 5000; // 5000 ms (after each 5 seconds)
 
 #define MOISTUREPIN 39
 #define LUMINOSITYPIN 36
+#define PUMPPIPN 25
 
-#define READING_INTERVAL 2000
+#define READING_INTERVAL 2*T_SECOND
+#define WATERING_INTERVAL 2*T_MINUTE
+#define WATERING_PERIOD 5* T_SECOND
+
+#define AUTO_MODE 0
+#define MANUAL_MODE 255
 
 // HTML content
 const char index_html[] PROGMEM = R"rawliteral(

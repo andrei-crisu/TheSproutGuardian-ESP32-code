@@ -18,6 +18,11 @@ JSONVar readings;
 
 // Timer variables
 static unsigned long lastUpdate = 0;
+static unsigned long pumpTime=0;
+
+static unsigned long startWateringTime=0;
+
+static unsigned long currentTime=0;
 
 // variables used for monitoring the Sprout
 float temperature = 0.0;
@@ -27,6 +32,7 @@ float moisture=0.0;
 int pumpStatus=PUMP_OFF;
 int lightStatus=LIGHT_ON;
 
+int wateringMode=AUTO_MODE;
 
 
 // Get Sensor Readings and return JSON object
@@ -58,6 +64,7 @@ void setup() {
   Serial.begin(115200);
   dht.begin();
   initWiFi();
+  pinMode(PUMPPIPN, OUTPUT);
 
   // Serve the HTML content
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -77,13 +84,63 @@ void setup() {
 
 void loop() {
 
-  if (millis() - lastUpdate > READING_INTERVAL) {
+  //read the current time
+  currentTime=millis();
+  //at overflow
+  if(lastUpdate>currentTime)
+  {
+    lastUpdate=currentTime;
+  }
+  if (currentTime - lastUpdate > READING_INTERVAL) {
     humidity = dht.readHumidity();
     temperature = dht.readTemperature();
     int moisture_analog_read=analogRead(MOISTUREPIN);
-    int luminosity_analog_read=analogRead(LUMINOSITYPIN)
+    int luminosity_analog_read=analogRead(LUMINOSITYPIN);
     Serial.println(luminosity_analog_read);
+    luminosity=((float)luminosity_analog_read/4095)*100;
     moisture=100-((float)moisture_analog_read/4095.0)*100;
-    lastUpdate = millis();
+    lastUpdate = currentTime;
   }
+
+if(wateringMode==AUTO_MODE)
+{
+//at overflow
+  if(pumpTime>currentTime)
+  {
+    pumpTime=currentTime;
+  }
+
+
+  if(currentTime-pumpTime>WATERING_INTERVAL)
+  {
+    if(pumpStatus==PUMP_OFF && moisture<25)
+    {
+      pumpStatus=PUMP_ON;
+      startWateringTime=currentTime;
+    }
+     //variable needed to check if it is time to check if the moisture level is normal
+     pumpTime=currentTime;
+
+  }
+
+  
+
+  if(currentTime-startWateringTime>WATERING_PERIOD)
+  {
+    pumpStatus=PUMP_OFF;
+    startWateringTime=currentTime;
+
+  }
+
+  if(pumpStatus==PUMP_ON)
+  {
+     digitalWrite(PUMPPIPN,HIGH);
+  }
+  else
+  {
+    digitalWrite(PUMPPIPN,LOW);
+  }
+  
+}
+
 }
