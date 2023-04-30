@@ -20,11 +20,13 @@ JSONVar readings;
 static unsigned long lastUpdate = 0;
 
 // variables used for monitoring the Sprout
-float temperature = 0;
-float humidity = 0;
-float luminosity=0;
+float temperature = 0.0;
+float humidity = 0.0;
+float luminosity=0.0;
+float moisture=0.0;
 int pumpStatus=PUMP_OFF;
 int lightStatus=LIGHT_ON;
+
 
 
 // Get Sensor Readings and return JSON object
@@ -32,6 +34,7 @@ String getSensorReadings() {
   readings["temperature"] = temperature;
   readings["humidity"] = humidity;
   readings["luminosity"] = luminosity;
+  readings["moisture"] = moisture;
   readings["pumpStatus"]=pumpStatus;
   readings["lightStatus"]=lightStatus;
   String jsonString = JSON.stringify(readings);
@@ -74,9 +77,13 @@ void setup() {
 
 void loop() {
 
-  if (millis() - lastUpdate > 2000) {
+  if (millis() - lastUpdate > READING_INTERVAL) {
     humidity = dht.readHumidity();
     temperature = dht.readTemperature();
+    int moisture_analog_read=analogRead(MOISTUREPIN);
+    int luminosity_analog_read=analogRead(LUMINOSITYPIN)
+    Serial.println(luminosity_analog_read);
+    moisture=100-((float)moisture_analog_read/4095.0)*100;
     lastUpdate = millis();
   }
 }
