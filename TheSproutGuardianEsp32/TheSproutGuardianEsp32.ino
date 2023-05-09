@@ -34,6 +34,8 @@ int lightStatus=LIGHT_ON;
 
 int wateringMode=AUTO_MODE;
 
+//stores elapsed time  since the last check
+unsigned int checkMoistureTime=0;
 
 // Get Sensor Readings and return JSON object
 String getSensorReadings() {
@@ -43,6 +45,8 @@ String getSensorReadings() {
   readings["moisture"] = moisture;
   readings["pumpStatus"]=pumpStatus;
   readings["lightStatus"]=lightStatus;
+  readings["wateringInterval"]=(float)WATERING_INTERVAL/T_SECOND;
+  readings["checkMoistureTime"]=(float)checkMoistureTime/T_SECOND;
   String jsonString = JSON.stringify(readings);
   return jsonString;
 }
@@ -52,7 +56,7 @@ void initWiFi() {
   WiFi.mode(WIFI_AP);
   WiFi.softAP(ESP32_SSID,ESP32_PASSWORD);
   //WiFi.begin(ssid, password);
-  Serial.print("Connecting to WiFi ..");
+  //Serial.print("Connecting to WiFi ..");
   IPAddress IP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(IP);
@@ -96,7 +100,9 @@ void loop() {
     temperature = dht.readTemperature();
     int moisture_analog_read=analogRead(MOISTUREPIN);
     int luminosity_analog_read=analogRead(LUMINOSITYPIN);
-    Serial.println(luminosity_analog_read);
+
+    Serial.println(humidity);
+
     luminosity=((float)luminosity_analog_read/4095)*100;
     moisture=100-((float)moisture_analog_read/4095.0)*100;
     lastUpdate = currentTime;
@@ -110,8 +116,12 @@ if(wateringMode==AUTO_MODE)
     pumpTime=currentTime;
   }
 
-
-  if(currentTime-pumpTime>WATERING_INTERVAL)
+  if(pumpStatus==PUMP_OFF)
+    checkMoistureTime=currentTime-pumpTime;
+  else
+    checkMoistureTime=WATERING_INTERVAL;
+    
+  if(checkMoistureTime>=WATERING_INTERVAL)
   {
     if(pumpStatus==PUMP_OFF && moisture<25)
     {
