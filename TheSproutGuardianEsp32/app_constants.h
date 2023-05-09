@@ -29,12 +29,25 @@ const char* ESP32_PASSWORD="TSG2023RKO";
 #define LUMINOSITYPIN 36
 #define PUMPPIPN 25
 
+//the value of the time interval for 
+//reading new data from sensors
 #define READING_INTERVAL 2*T_SECOND
+
+//the value of the time interval for
+//checking the moisture level
+//and activation of water pump if necessary
 #define WATERING_INTERVAL 2*T_MINUTE
+
+//the period while the pump is on 
+// and provids water to  the plant
 #define WATERING_PERIOD 5* T_SECOND
 
 #define AUTO_MODE 0
 #define MANUAL_MODE 255
+
+//the value used to activate the water pump
+//if the detected moisture is under 25%  the pump will be activated 
+#define MOISTURE_THRESHOLD 25
 
 // HTML content
 const char index_html[] PROGMEM = R"rawliteral(
