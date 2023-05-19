@@ -1,3 +1,5 @@
+// Author : CRISU RADU ANDREI
+
 #ifndef APP_CONSTANTS_H
 #define APP_CONSTANTS_H
 
@@ -26,7 +28,7 @@ const char* ESP32_PASSWORD="TSG2023RKO";
 #define DHTTYPE DHT11
 
 #define MOISTUREPIN 39
-#define LUMINOSITYPIN 36
+#define LUMINOSITYPIN 35
 #define PUMPPIPN 25
 
 //the value of the time interval for 
