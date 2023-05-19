@@ -34,6 +34,9 @@ int lightStatus=LIGHT_ON;
 
 int wateringMode=AUTO_MODE;
 
+ unsigned int moisture_analog_read=0;
+ unsigned int luminosity_analog_read=0;
+
 //stores elapsed time  since the last check
 unsigned int checkMoistureTime=0;
 
@@ -90,40 +93,35 @@ void loop() {
 
   //read the current time
   currentTime=millis();
-  //at overflow
-  if(lastUpdate>currentTime)
-  {
-    lastUpdate=currentTime;
-  }
+  
   if (currentTime - lastUpdate > READING_INTERVAL) {
     humidity = dht.readHumidity();
     temperature = dht.readTemperature();
-    int moisture_analog_read=analogRead(MOISTUREPIN);
-    int luminosity_analog_read=analogRead(LUMINOSITYPIN);
+    moisture_analog_read=analogRead(MOISTUREPIN);
+    luminosity_analog_read=analogRead(LUMINOSITYPIN);
 
+    
+
+    luminosity=((float)luminosity_analog_read/4095.0)*100.0;
+    moisture=100-((float)moisture_analog_read/4095.0)*100.0;
+
+    Serial.print("Humidity: ");
     Serial.println(humidity);
+    Serial.print("Temp: ");
+    Serial.println(temperature);
+    Serial.print("Moisture: ");
+    Serial.println(moisture);
+    Serial.print("Luminosity: ");
+    Serial.println(luminosity);
 
-    luminosity=((float)luminosity_analog_read/4095)*100;
-    moisture=100-((float)moisture_analog_read/4095.0)*100;
     lastUpdate = currentTime;
   }
 
-if(wateringMode==AUTO_MODE)
-{
-//at overflow
-  if(pumpTime>currentTime)
-  {
-    pumpTime=currentTime;
-  }
+  checkMoistureTime=currentTime-pumpTime;
 
-  if(pumpStatus==PUMP_OFF)
-    checkMoistureTime=currentTime-pumpTime;
-  else
-    checkMoistureTime=WATERING_INTERVAL;
-    
   if(checkMoistureTime>=WATERING_INTERVAL)
   {
-    if(pumpStatus==PUMP_OFF && moisture<25)
+    if(pumpStatus==PUMP_OFF && moisture<MOISTURE_THRESHOLD)
     {
       pumpStatus=PUMP_ON;
       startWateringTime=currentTime;
@@ -151,6 +149,5 @@ if(wateringMode==AUTO_MODE)
     digitalWrite(PUMPPIPN,LOW);
   }
   
-}
 
 }
